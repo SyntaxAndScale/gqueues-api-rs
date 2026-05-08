@@ -21,7 +21,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gqueues-api-rs = { git = "https://github.com/SyntaxAndScale/gqueues-api-rs" }
+gqueues-api-rs = { git = "https://github.com/SyntaxAndScale/gqueues-api-rs", tag = "v0.2.0" }
 tokio = { version = "1.0", features = ["full"] }
 ```
 
