@@ -284,7 +284,6 @@ impl GqueuesClient {
         parse_quick_add_syntax: bool,
         idempotency_key: &str,
     ) -> Result<Task> {
-        let url = format!("{}/v0", self.base_url);
         let mut instruction = serde_json::json!({
             "text": text,
             "parseQuickAddSyntax": parse_quick_add_syntax,
@@ -306,9 +305,23 @@ impl GqueuesClient {
             instruction["dueDate"] = serde_json::json!({ "rawDate": d });
         }
 
+        let results = self.create_tasks_with_idempotency(vec![instruction], idempotency_key).await?;
+        let res = results.into_iter().next().ok_or_else(|| {
+            GqueuesError::InternalError("No result returned from batch creation".into())
+        })?;
+        res
+    }
+
+    /// Creates multiple tasks in a single batch.
+    pub async fn create_tasks_with_idempotency(
+        &self,
+        instructions: Vec<serde_json::Value>,
+        idempotency_key: &str,
+    ) -> Result<Vec<Result<Task>>> {
+        let url = format!("{}/v0", self.base_url);
         let body = serde_json::json!({
             "action": "createTask",
-            "instructions": [instruction]
+            "instructions": instructions
         });
 
         let resp = self
@@ -342,13 +355,13 @@ impl GqueuesClient {
 
         if !resp.status().is_success() {
             return Err(GqueuesError::ApiError(format!(
-                "Failed to create task: {}",
+                "Failed to create tasks: {}",
                 resp.status()
             )));
         }
 
         let body = resp.text().await.map_err(|e| {
-            GqueuesError::InternalError(format!("Failed to read create task response body: {}", e))
+            GqueuesError::InternalError(format!("Failed to read create tasks response body: {}", e))
         })?;
 
         #[derive(Deserialize)]
@@ -358,26 +371,24 @@ impl GqueuesClient {
 
         let data: CreateResponse = serde_json::from_str(&body).map_err(|e| {
             GqueuesError::SerializationError(format!(
-                "Failed to decode create task response: {}. Body: {}",
+                "Failed to decode create tasks response: {}. Body: {}",
                 e, body
             ))
         })?;
-        let task_json = data.results.first().ok_or_else(|| {
-            GqueuesError::InternalError(format!(
-                "No task returned in creation response. Body: {}",
-                body
-            ))
-        })?;
 
-        // The API returns { status: "created", task: { ... } }
-        let task: Task = serde_json::from_value(task_json["task"].clone()).map_err(|e| {
-            GqueuesError::SerializationError(format!(
-                "Failed to parse created task: {}. Item: {}",
-                e, task_json
-            ))
-        })?;
+        let results = data.results.into_iter().map(|res| {
+            if res["status"] == "created" {
+                serde_json::from_value(res["task"].clone()).map_err(|e| {
+                    GqueuesError::SerializationError(format!("Failed to parse created task: {}", e))
+                })
+            } else {
+                Err(GqueuesError::ApiError(
+                    res["error"].as_str().unwrap_or("Unknown error").to_string()
+                ))
+            }
+        }).collect();
 
-        Ok(task)
+        Ok(results)
     }
 
     /// Creates a new task with an automatically generated idempotency key.
