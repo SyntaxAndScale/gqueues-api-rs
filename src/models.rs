@@ -80,4 +80,6 @@ pub struct DateInfo {
 pub struct DueDateInfo {
     /// The raw due date string.
     pub raw_date: Option<String>,
+    /// The raw due time string.
+    pub raw_time: Option<String>,
 }

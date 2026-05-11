@@ -277,20 +277,33 @@ impl GqueuesClient {
         &self,
         text: &str,
         queue_key: Option<&str>,
+        parent_key: Option<&str>,
         notes: Option<&str>,
+        tags: Option<Vec<String>>,
+        due_date: Option<&str>,
+        parse_quick_add_syntax: bool,
         idempotency_key: &str,
     ) -> Result<Task> {
         let url = format!("{}/v0", self.base_url);
         let mut instruction = serde_json::json!({
             "text": text,
-            "parseQuickAddSyntax": queue_key.is_none(), // Disable if we have an explicit queue
+            "parseQuickAddSyntax": parse_quick_add_syntax,
         });
 
         if let Some(qk) = queue_key {
             instruction["queueKey"] = serde_json::json!(qk);
         }
+        if let Some(pk) = parent_key {
+            instruction["parentKey"] = serde_json::json!(pk);
+        }
         if let Some(n) = notes {
             instruction["notes"] = serde_json::json!(n);
+        }
+        if let Some(t) = tags {
+            instruction["tags"] = serde_json::json!(t);
+        }
+        if let Some(d) = due_date {
+            instruction["dueDate"] = serde_json::json!({ "rawDate": d });
         }
 
         let body = serde_json::json!({
@@ -375,7 +388,16 @@ impl GqueuesClient {
         notes: Option<&str>,
     ) -> Result<Task> {
         let idempotency_key = uuid::Uuid::new_v4().to_string();
-        self.create_task_with_idempotency(text, queue_key, notes, &idempotency_key)
-            .await
+        self.create_task_with_idempotency(
+            text,
+            queue_key,
+            None,
+            notes,
+            None,
+            None,
+            queue_key.is_none(),
+            &idempotency_key,
+        )
+        .await
     }
 }
