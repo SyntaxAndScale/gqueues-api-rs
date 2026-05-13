@@ -134,8 +134,10 @@ pub struct DueDateInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Attachment {
-    pub key: String,
+    pub id: String,
     pub name: String,
     pub url: String,
+    pub icon: Option<String>,
+    pub short_url: Option<String>,
     pub mime_type: Option<String>,
 }
