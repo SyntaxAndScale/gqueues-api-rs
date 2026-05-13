@@ -75,6 +75,8 @@ pub struct Task {
     /// Whether comments can be added.
     #[serde(default)]
     pub add_comments: bool,
+    /// Local-only ordering state.
+    pub local_order: Option<f64>,
 }
 
 /// Represents an assignment of a task to a user.
@@ -121,7 +123,7 @@ pub struct DueDateInfo {
     /// The raw due time string.
     pub raw_time: Option<String>,
     /// Duration if applicable.
-    pub duration: Option<String>,
+    pub duration: Option<u32>,
     /// Reminder settings.
     pub reminder: Option<serde_json::Value>,
     /// Repeats setting (duplicated from Task level if needed by API).
