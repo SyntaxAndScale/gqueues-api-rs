@@ -54,22 +54,56 @@ pub struct Task {
     /// Recurrence information.
     #[serde(default)]
     pub repeats: serde_json::Value, // Can be bool or object
+    
+    // Expanded fields
+    /// The section key this task belongs to.
+    pub section_key: Option<String>,
+    /// List of attachments.
+    pub attachments: Option<Vec<Attachment>>,
+    /// Whether the task is crossed off.
+    #[serde(default)]
+    pub crossed: bool,
+    /// Number of comments.
+    pub num_comments: Option<u32>,
+    /// Whether the task has subitems (shorthand check).
+    #[serde(default)]
+    pub has_subitems: bool,
+    /// The position string for ordering.
+    pub position: Option<String>,
+    /// Access level.
+    pub access: Option<String>,
+    /// Whether comments can be added.
+    #[serde(default)]
+    pub add_comments: bool,
 }
 
 /// Represents an assignment of a task to a user.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Assignment {
+    /// The unique key for the assignment.
+    pub key: Option<String>,
     /// The email address of the assignee.
     pub email: String,
     /// The name of the assignee.
     pub name: String,
+    /// Profile URL.
+    pub profile: Option<String>,
+    /// Comment for the assignment.
+    pub comment: Option<String>,
+    /// Date completed.
+    pub date_completed: Option<String>,
+    /// Whether the assignment is completed.
+    #[serde(default)]
+    pub completed: bool,
 }
 
 /// Information about a date.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DateInfo {
+    /// The display text of the date.
+    pub text: Option<String>,
     /// The raw date string.
     pub raw: String,
 }
@@ -78,8 +112,28 @@ pub struct DateInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct DueDateInfo {
+    /// The display title of the due date.
+    pub title: Option<String>,
+    /// The display text.
+    pub text: Option<String>,
     /// The raw due date string.
     pub raw_date: Option<String>,
     /// The raw due time string.
     pub raw_time: Option<String>,
+    /// Duration if applicable.
+    pub duration: Option<String>,
+    /// Reminder settings.
+    pub reminder: Option<serde_json::Value>,
+    /// Repeats setting (duplicated from Task level if needed by API).
+    pub repeats: Option<serde_json::Value>,
+}
+
+/// Represents an attachment.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Attachment {
+    pub key: String,
+    pub name: String,
+    pub url: String,
+    pub mime_type: Option<String>,
 }

@@ -390,7 +390,7 @@ dependencies = [
 
 [[package]]
 name = "gqueues-api-rs"
-version = "0.2.0"
+version = "0.2.2"
 dependencies = [
  "chrono",
  "log",
