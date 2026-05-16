@@ -31,7 +31,7 @@ pub struct Task {
     /// The unique identifier for the task.
     pub key: String,
     /// The title of the task.
-    pub title: String,
+    pub title: Option<String>,
     /// Optional notes or description for the task.
     pub notes: Option<String>,
     /// Whether the task is marked as completed.
@@ -86,9 +86,9 @@ pub struct Assignment {
     /// The unique key for the assignment.
     pub key: Option<String>,
     /// The email address of the assignee.
-    pub email: String,
+    pub email: Option<String>,
     /// The name of the assignee.
-    pub name: String,
+    pub name: Option<String>,
     /// Profile URL.
     pub profile: Option<String>,
     /// Comment for the assignment.
@@ -134,9 +134,9 @@ pub struct DueDateInfo {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Attachment {
-    pub id: String,
-    pub name: String,
-    pub url: String,
+    pub id: Option<String>,
+    pub name: Option<String>,
+    pub url: Option<String>,
     pub icon: Option<String>,
     pub short_url: Option<String>,
     pub mime_type: Option<String>,
